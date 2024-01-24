@@ -1,0 +1,17 @@
+kmean_id,Category In English,Mer_Name,count
+0,Grocery,Rajasthan Handicrafts,15053
+0,Grocery,Saraswati Fabrics,5970
+0,Grocery,Madurai Music Mania,2912
+0,F&B,Jai Hind General Stores,2578
+0,Fashion,Agra Appliance Arena,2312
+2,Grocery,Rajasthan Handicrafts,846
+2,Grocery,Madurai Music Mania,337
+2,Fashion,Agra Appliance Arena,252
+2,Grocery,Saraswati Fabrics,214
+2,F&B,Mumbai Fashion Hub,113
+3,Grocery,Rajasthan Handicrafts,30
+1,Grocery,Rajasthan Handicrafts,7
+3,Grocery,Madurai Music Mania,4
+3,Fashion,Agra Appliance Arena,4
+3,Fashion,Faridabad Footwear Fair,2
+3,F&B,Mumbai Fashion Hub,2
