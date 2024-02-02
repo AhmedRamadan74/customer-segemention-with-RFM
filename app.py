@@ -9,9 +9,9 @@ import joblib
 import itertools
 
 #read data
-df_orginal=pd.read_csv("Cleaned_Data_Merchant_Name.csv")
-df_rfm=pd.read_csv("df_rfm.csv")# data that has RFM 
-data_cat=pd.read_csv("data_cat.csv") # recommend mer name for each category depends on clustering
+df=pd.read_csv("Cleaned_Data_Merchant_Name.csv")
+df_rfm=pd.read_csv("df_rfm.csv")# data that has RFM  and cluster
+
 
 #layout
 st.set_page_config(page_title="Customer Segmention",layout="wide")
@@ -28,68 +28,57 @@ with row0_2:
     st.subheader('Github : App by [Ahmed Ramadan](https://github.com/AhmedRamadan74/customer-segemention-with-RFM)')
 
 user_id=st.selectbox("Please enter you ID :",df_rfm["User_Id"].unique())
+num_rec=st.number_input("Please enter number of recomendation ",min_value=1)
 
-total_point=df_orginal[df_orginal["User_Id"]==user_id]["Points"].sum()
-
-st.write(f"You have {total_point} points ")
-st.write("*"*5)
 #backend function to recommend best three merchant
-def recommend_mer(user_id):
+#num_mer is number of recommandation to merchant
+def recommend_mer(user_id,num_mer):
+    if df_rfm[df_rfm["User_Id"]==user_id]["dbscan"].values[0]=='only_F&B':
+        F_B=df[df["Category In English"]=="F&B"]["Mer_Name"].value_counts().head(num_mer).index.tolist()
+        #print
+        st.write("You can spend your points in Food and beverage with : ")
+        for i,mer in enumerate(F_B,1):
+            st.write(f"{i} - {mer}")
+            
+    elif df_rfm[df_rfm["User_Id"]==user_id]["dbscan"].values[0]=='only_Fashion':
+        Fashion=df[df["Category In English"]=="Fashion"]["Mer_Name"].value_counts().head(num_mer).index.tolist()
+        #print 
+        st.write("You can spend your points in Fashion with : ")
+        for i,mer in enumerate(Fashion,1):
+            st.write(f"{i} - {mer}")
+                
+    elif df_rfm[df_rfm["User_Id"]==user_id]["dbscan"].values[0]=='only_Grocery':
+        Grocery=df[df["Category In English"]=="Grocery"]["Mer_Name"].value_counts().head(num_mer).index.tolist()
+        #print 
+        st.write("You can spend your points in Grocery with : ")
+        for i,mer in enumerate(Grocery,1): 
+            st.write(f"{i} - {mer}")
+            
+    elif df_rfm[df_rfm["User_Id"]==user_id]["dbscan"].values[0]=='only_Health&Beauty':
+        Health_Beauty=df[df["Category In English"]=='Health & Beauty']["Mer_Name"].value_counts().head(num_mer).index.tolist()  
+        #print 
+        st.write("You can spend your points in Health&Beauty with : ")
+        for i,mer in enumerate(Health_Beauty,1):
+            st.write(f"{i} - {mer}")
+            
+    else:# dbscan=='all_Categories'
+        F_B=df[df["Category In English"]=="F&B"]["Mer_Name"].value_counts().head(num_mer).index.tolist()
+        Fashion=df[df["Category In English"]=="Fashion"]["Mer_Name"].value_counts().head(num_mer).index.tolist()
+        Grocery=df[df["Category In English"]=="Grocery"]["Mer_Name"].value_counts().head(num_mer).index.tolist()
+        #print 
+        st.write("You can spend your points in Grocery , Food and beverage and Fashion with : ")
+        st.write("With Grocery : ")
+        for i,mer in enumerate(Grocery,1):
+            st.write(f"{i} - {mer}")
+            
+        st.write("*"*5)    
+        st.write("with Food and beverage : ")
+        for i,mer in enumerate(F_B,1):
+            st.write(f"{i} - {mer}")
+            
+        st.write("*"*5)    
+        st.write("with Fashion : ")
+        for i,mer in enumerate(Fashion,1):
+            st.write(f"{i} - {mer}") 
 
-    #category for each clustering 
-    #list have mer_name for each Category 
-    Grocery_0=data_cat[(data_cat['kmean_id']==0) & (data_cat['Category In English']=="Grocery")]["Mer_Name"].tolist()
-    F_B_0=data_cat[(data_cat['kmean_id']==0) & (data_cat['Category In English']=="F&B")]["Mer_Name"].tolist()
-    Fashion_0=data_cat[(data_cat['kmean_id']==0) & (data_cat['Category In English']=="Fashion")]["Mer_Name"].tolist()
-
-    Grocery_1=data_cat[(data_cat['kmean_id']==1) & (data_cat['Category In English']=="Grocery")]["Mer_Name"].tolist()
-
-    Grocery_2=data_cat[(data_cat['kmean_id']==2) & (data_cat['Category In English']=="Grocery")]["Mer_Name"].tolist()
-    F_B_2=data_cat[(data_cat['kmean_id']==2) & (data_cat['Category In English']=="F&B")]["Mer_Name"].tolist()
-    Fashion_2=data_cat[(data_cat['kmean_id']==2) & (data_cat['Category In English']=="Fashion")]["Mer_Name"].tolist()
-
-    Grocery_3=data_cat[(data_cat['kmean_id']==3) & (data_cat['Category In English']=="Grocery")]["Mer_Name"].tolist()
-    F_B_3=data_cat[(data_cat['kmean_id']==3) & (data_cat['Category In English']=="F&B")]["Mer_Name"].tolist()
-    Fashion_3=data_cat[(data_cat['kmean_id']==3) & (data_cat['Category In English']=="Fashion")]["Mer_Name"].tolist()
-    
-    #Get all cluserting for user
-    kmeans=df_rfm[df_rfm["User_Id"]==user_id]["kmean_id"].unique()
-    Grocery=[]
-    F_B=[]
-    Fashion=[]
-    for kmean in kmeans:
-        if kmean==0:
-            Grocery.append(Grocery_0)
-            F_B.append(F_B_0)
-            Fashion.append(Fashion_0)
-        if kmean==1:
-            Grocery.append(Grocery_1)
-        if kmean==2:
-            Grocery.append(Grocery_2)
-            F_B.append(F_B_2)
-            Fashion.append(Fashion_2)
-        if kmean==3:
-            Grocery.append(Grocery_3)
-            F_B.append(F_B_3)
-            Fashion.append(Fashion_3)
-    #to convert from 3-d to 1d list , convert from set to list because drop dulipcted
-    Grocery=set(list(itertools.chain(*Grocery))) 
-    F_B=set(list(itertools.chain(*F_B)))
-    Fashion=set(list(itertools.chain(*Fashion)))
-    
-    st.write("We recommended for you spend points in ")
-    
-    st.write("In Grocery You have : ")
-    for Grocery in Grocery:
-        st.write(Grocery)
-
-    st.write("*"*5)
-    st.write("In food and beverage You have : ")
-    for food in F_B:
-        st.write(food)
-    st.write("*"*5)
-    st.write("In Fashion You have : ")
-    for Fashion in Fashion:
-        st.write(Fashion)
-
-recommend_mer(user_id)
+recommend_mer(user_id,num_rec)
